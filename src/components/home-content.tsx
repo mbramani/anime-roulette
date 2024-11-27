@@ -10,7 +10,7 @@ import { Anime } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export default function HomeContent() {
-  const [username, setUsername] = useLocalStorage<string>("mal-username", "");
+  const [username, setUsername] = useLocalStorage<string>("mal-username", "mbramani");
   const [animeList, setAnimeList] = useLocalStorage<Anime[]>("anime-list", []);
   const [filteredList, setFilteredList] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(false);
