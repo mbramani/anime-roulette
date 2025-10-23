@@ -13,7 +13,7 @@ interface AnimeListResponse {
 
 export async function fetchAnimeList(username: string): Promise<Anime[]> {
   let allAnime: Anime[] = [];
-  let nextUrl: string | null = `${MAL_API_BASE_URL}/users/${username}/animelist?limit=1000&fields=list_status,num_episodes,media_type,status&nsfw=true`;
+  let nextUrl: string | null = `${MAL_API_BASE_URL}/users/${username}/animelist?limit=1000&fields=list_status,num_episodes,media_type,mean,rank,popularity,num_list_users,start_date,end_date,start_season,source,rating,studios,genres&nsfw=true`;
 
   try {
     while (nextUrl) {

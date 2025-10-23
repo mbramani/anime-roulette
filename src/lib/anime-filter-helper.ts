@@ -1,9 +1,9 @@
 import {
   Anime,
-  SortOrder,
-  AnimeType,
   AnimeStatus,
+  AnimeType,
   EpisodesWatchedFilter,
+  SortOrder,
 } from "@/lib/types";
 
 export function filterAnimeList(
@@ -11,6 +11,7 @@ export function filterAnimeList(
   animeType: AnimeType,
   animeStatus: AnimeStatus,
   episodesWatched: EpisodesWatchedFilter,
+  showNSFW: boolean = true,
 ): Anime[] {
   let filtered = [...animeList];
 
@@ -41,6 +42,10 @@ export function filterAnimeList(
     });
   }
 
+  if (!showNSFW) {
+    filtered = filtered.filter((anime) => anime.node.rating !== "Rx");
+  }
+
   return filtered;
 }
 
@@ -60,12 +65,14 @@ export function getRandomAnime(
   animeStatus: AnimeStatus,
   episodesWatched: EpisodesWatchedFilter,
   count: number,
+  showNSFW: boolean = true,
 ): Anime[] {
   const filteredAnime = filterAnimeList(
     animeList,
     animeType,
     animeStatus,
     episodesWatched,
+    showNSFW,
   );
 
   if (filteredAnime.length === 0) {

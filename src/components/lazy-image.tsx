@@ -1,41 +1,56 @@
-import { useState, useEffect, useRef, ImgHTMLAttributes } from "react";
+import { ImgHTMLAttributes, useEffect, useRef } from 'react';
 
-const PLACEHOLDER_SRC = "/anime-loading.gif";
+type LazyImageProps = ImgHTMLAttributes<HTMLImageElement> & {
+  onLoad?: () => void;
+  onError?: () => void;
+};
 
-interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {}
+const PLACEHOLDER = "/anime-loading.gif";
 
-export default function LazyImage({ src, alt, ...props }: LazyImageProps) {
-  const [isInView, setIsInView] = useState(false);
+export default function LazyImage({
+  src = '',
+  alt = '',
+  onLoad,
+  onError,
+  className = '',
+  ...rest
+}: LazyImageProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  useEffect(function () {
-    const observer = new IntersectionObserver(
-      function ([entry]) {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect(); // Stop observing once the image is in view
+  useEffect(() => {
+    if (!imgRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && imgRef.current) {
+          // Switch to real source
+          imgRef.current.src = src;
+          observerRef.current?.disconnect();
         }
       },
-      { threshold: 0.1 } // Adjust threshold as needed
+      { threshold: 0.1, rootMargin: '50px' } // start 50 px before entering viewport
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
+    observerRef.current.observe(imgRef.current);
 
-    return function () {
-      if (imgRef.current) {
-        observer.unobserve(imgRef.current);
-      }
-    };
-  }, []);
+    return () => observerRef.current?.disconnect();
+  }, [src]);
 
   return (
     <img
       ref={imgRef}
-      src={isInView ? src : PLACEHOLDER_SRC} // Use built-in placeholder until in view
+      src={PLACEHOLDER}
       alt={alt}
-      {...props}
+      loading="lazy"
+      decoding="async"
+      onLoad={onLoad}
+      onError={(e) => {
+        if (imgRef.current) imgRef.current.src = PLACEHOLDER;
+        onError?.();
+      }}
+      className={`${className} lazy`}
+      {...rest}
     />
   );
 }
